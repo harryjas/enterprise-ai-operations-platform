@@ -1,8 +1,14 @@
+using Microsoft.EntityFrameworkCore;
 using Platform.Api.Models;
+using Platform.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<PlatformDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+);
 
 var app = builder.Build();
 
@@ -15,9 +21,9 @@ var workItems = new List<WorkItem>();
 
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
 
-app.MapGet("/api/work-items", () => Results.Ok(workItems));
+app.MapGet("/api/work-items", async (PlatformDbContext dbContext) => await dbContext.WorkItems.AsNoTracking().ToListAsync());
 
-app.MapPost("/api/work-items", (CreateWorkItemRequest request) =>
+app.MapPost("/api/work-items", async (CreateWorkItemRequest request, PlatformDbContext dbContext) =>
 {
     if (string.IsNullOrWhiteSpace(request.Title) ||
         string.IsNullOrWhiteSpace(request.TenantId))
@@ -32,12 +38,16 @@ app.MapPost("/api/work-items", (CreateWorkItemRequest request) =>
     var workItem = new WorkItem
     {
         Title = request.Title.Trim(),
-        TenantId = request.TenantId.Trim()
+        TenantId = request.TenantId.Trim(),
+        Status = request.Status?.Trim() ?? "Open"
     };
 
-    workItems.Add(workItem);
+    dbContext.WorkItems.Add(workItem);
+    await dbContext.SaveChangesAsync();
 
     return Results.Created($"/api/work-items/{workItem.Id}", workItem);
 });
 
 app.Run();
+
+public partial class Program { }
