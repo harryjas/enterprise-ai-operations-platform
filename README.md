@@ -75,3 +75,4 @@ Tests use a separate `PlatformDb_Test` database, recreated on each run.
 
 ## Architecture decisions
 Decision records will be kept in the `adr/` folder.
+InProgress
