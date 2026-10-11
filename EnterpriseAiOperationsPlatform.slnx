@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/AiChat.Console/AiChat.Console.csproj" />
     <Project Path="src/Platform.Api/Platform.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/AiChat.Console.Tests/AiChat.Console.Tests.csproj" />
     <Project Path="tests/Platform.Api.Tests/Platform.Api.Tests.csproj" />
   </Folder>
 </Solution>
