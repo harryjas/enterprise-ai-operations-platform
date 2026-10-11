@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Platform.Api.Models;
 using Platform.Api.Data;
+using Platform.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +10,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<PlatformDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
 );
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -48,6 +52,7 @@ app.MapPost("/api/work-items", async (CreateWorkItemRequest request, PlatformDbC
     return Results.Created($"/api/work-items/{workItem.Id}", workItem);
 });
 
+app.MapGet("/boom", () => { throw new InvalidOperationException("test failure"); });
 app.Run();
 
 public partial class Program { }
